@@ -7,3 +7,24 @@ The subfolder screens contains the info screens shown when no game is running. T
 # License
 
 This code is licensed under GNU General Public License v3.
+
+# How To Build The Firmware With Docker
+This will create a directory in `firmware/build/` in your local repository
+* create the image
+```bash
+docker build -t gbinterceptor .
+```
+* start a shell inside the container
+```bash
+docker run --rm -it --name gbinterceptor -v $(pwd)/firmware:/root/firmware gbinterceptor
+```
+* if you run it for the first time, create the build files
+```bash
+# this will run cmake
+create-build
+```
+* build the `.uf2` file
+```bash
+make
+# now you should have the built firmware also outside of the docker container in firmware/build/gb_interceptor.uf2
+```
