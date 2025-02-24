@@ -120,15 +120,15 @@ bool usbSendFrame() {
 
 void updateFallbackScreen() { 
     fallbackFrameIndex++;
-    if (fallbackFrameIndex >= 160)
+    if (fallbackFrameIndex >= 80)
         fallbackFrameIndex = 0;
-    for (int x = 0; x < SCREEN_W/2; x++) {
-        if (x < fallbackFrameIndex && x + 80 > fallbackFrameIndex) {
-            backBuffer[63*SCREEN_W + 80 + x] = 0x03;
-            backBuffer[63*SCREEN_W + 79 - x] = 0x03;
+    for (int x = 0; x < TETRIS_PLAYFIELD_W/2; x++) {
+        if (x < fallbackFrameIndex && x + 40 > fallbackFrameIndex) {
+            backBuffer[29*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X + x] = 0x03;
+            backBuffer[29*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X - 1 - x] = 0x03;
         } else {
-            backBuffer[63*SCREEN_W + 80 + x] = 0x00;
-            backBuffer[63*SCREEN_W + 79 - x] = 0x00;
+            backBuffer[29*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X + x] = 0x00;
+            backBuffer[29*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X - 1 - x] = 0x00;
         }
     }
 }
@@ -167,22 +167,27 @@ int main(void) {
         printf("Waiting for game.\n");
         updateIncludeChroma();
         uint lastFrame = timer_hw->timerawl;
+        uint8_t xOffsetTetris = TETRIS_PLAYFIELD_OFFSET_X + 4;
         while (!running) {
             if (isGameBoyOn()) {
                 if (fallbackScreenType == FST_NONE || fallbackScreenType == FST_OFF) {
                     loadFallbackScreen(default_raw, FST_DEFAULT);
-                    renderText("Waiting for game...", 0x03, 0x00, (uint8_t *)backBuffer, 5, 79);
+                    renderText("Waiting\nfor game", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 79);
                     if (!includeChroma)
-                        renderText("   60 fps mode.\nSwitch to 30fps if\nthere are problems.", 0x03, 0x00, (uint8_t *)backBuffer, 5, 100);
+                        renderText("60 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
+                    else
+                        renderText("30 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
                     readyBufferIsNew = false;
                     startBackbufferToJPEG(false);
                 }
             } else {
                 if (fallbackScreenType == FST_NONE || fallbackScreenType == FST_DEFAULT || fallbackScreenType == FST_ERROR) {
                     loadFallbackScreen(off_raw, FST_OFF);
-                    renderText("The Game Boy\nis turned off", 0x03, 0x00, (uint8_t *)backBuffer, 40, 79);
+                    renderText("Turn on\nGame Boy", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 79);
                     if (!includeChroma)
-                        renderText("   60 fps mode.\nSwitch to 30fps if\nthere are problems.", 0x03, 0x00, (uint8_t *)backBuffer, 5, 100);
+                        renderText("60 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
+                    else
+                        renderText("30 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
                     readyBufferIsNew = false;
                     startBackbufferToJPEG(false);
                 }
@@ -268,7 +273,7 @@ int main(void) {
         if (error != NULL) {
             mutex_enter_blocking(&cpubusMutex); //Grab mutex immediately.
             loadFallbackScreen(error_raw, FST_ERROR);
-            renderText("Sorry,\nsomething\nwent wrong...", 0x03, 0x00, (uint8_t *)backBuffer, 44, 72);
+            renderText("Sorry,\nsomething\nwent wrong", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 72);
             renderText((const char *)error, 0x02, 0x00, (uint8_t *)backBuffer, 4, 110);
             readyBufferIsNew = false;
             startBackbufferToJPEG(false);
