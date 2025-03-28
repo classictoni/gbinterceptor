@@ -40,6 +40,8 @@ bool dmgColorMode = false;
 bool includeChroma = true;
 bool is30fpsFrame = true;
 
+bool showFps = false;
+
 void setupGPIO() {
     gpio_init(GBSENSE_PIN);
     gpio_init(LED_SWITCH_PIN);
@@ -172,22 +174,26 @@ int main(void) {
             if (isGameBoyOn()) {
                 if (fallbackScreenType == FST_NONE || fallbackScreenType == FST_OFF) {
                     loadFallbackScreen(default_raw, FST_DEFAULT);
-                    renderText("Waiting\nfor game", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 79);
-                    if (!includeChroma)
-                        renderText("60 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
-                    else
-                        renderText("30 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
+                    renderText("Waiting\nfor game", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, showFps ? 79 : 106);
+                    if (showFps) {
+                        if (!includeChroma)
+                            renderText("60 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
+                        else
+                            renderText("30 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
+                    }
                     readyBufferIsNew = false;
                     startBackbufferToJPEG(false);
                 }
             } else {
                 if (fallbackScreenType == FST_NONE || fallbackScreenType == FST_DEFAULT || fallbackScreenType == FST_ERROR) {
                     loadFallbackScreen(off_raw, FST_OFF);
-                    renderText("Turn on\nGame Boy", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 79);
-                    if (!includeChroma)
-                        renderText("60 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
-                    else
-                        renderText("30 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
+                    renderText("Turn on\nGame Boy", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, showFps ? 79 : 106);
+                    if (showFps) {
+                        if (!includeChroma)
+                            renderText("60 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
+                        else
+                            renderText("30 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
+                    }
                     readyBufferIsNew = false;
                     startBackbufferToJPEG(false);
                 }
