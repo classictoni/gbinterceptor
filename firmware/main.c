@@ -47,6 +47,8 @@ bool hideLogo = false;
 bool animateLogo = true;
 bool logoAnimationMirror = false;
 uint animationQuarterLength = 32;
+uint angleSkipThreshold = 1;
+char __in_flash("screens")* logo = ctec_logo_raw;
 
 void setupGPIO() {
     gpio_init(GBSENSE_PIN);
@@ -140,8 +142,8 @@ void updateLogo() {
     for (uint h = 0; h < 64; ++h) {
         for (int w = 0; w < 64; ++w) {
             // skip angle 0 because it looks stupid
-            if ((logoFrameIndex % animationHalfLength) < 2) {
-                logoFrameIndex += 2;
+            if ((logoFrameIndex % animationHalfLength) >= animationHalfLength - angleSkipThreshold) {
+                logoFrameIndex += angleSkipThreshold << 1;
             }
             uint angle;
             if (logoAnimationMirror) {
@@ -152,7 +154,7 @@ void updateLogo() {
             double newWidthFromCenter = animateLogo
                 ? cos(M_PI * ((angle) / (1.0 * animationHalfLength))) * (w - 32)
                 : w - 32;
-            backBuffer[(topStart + h) * SCREEN_W + leftStart + ((int) newWidthFromCenter + 32)] = ctec_logo_raw[h * 64 + w];
+            backBuffer[(topStart + h) * SCREEN_W + leftStart + ((int) newWidthFromCenter + 32)] = logo[h * 64 + w];
         }
     }
 }
