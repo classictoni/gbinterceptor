@@ -97,7 +97,7 @@ char * string_desc_arr [] =
 {
   (char[]) { 0x09, 0x04 }, // 0: is supported language is English (0x0409)
   "there.oughta.be",             // 1: Manufacturer
-  "GB Interceptor",              // 2: Product
+  GBI_NAME,                      // 2: Product
   "1234567890123456",            // 3: Serials, should use chip ID
   "GB Interceptor Video",        // 4: UVC Interface
 };

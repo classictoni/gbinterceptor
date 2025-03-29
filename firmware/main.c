@@ -1,6 +1,7 @@
 #include "main.h"
 
 #include <stdio.h>
+#include <math.h>
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 #include "pico/mutex.h"
@@ -24,12 +25,14 @@
 #include "screens/default.h"
 #include "screens/off.h"
 #include "screens/error.h"
+#include "screens/ctec-logo.h"
 
 bool frameSending = false;
 
 bool modeButtonDebounce = true;
 
 uint fallbackFrameIndex = 0;
+uint logoFrameIndex = 0;
 enum FallbackScreenType {FST_NONE = 0, FST_DEFAULT, FST_OFF, FST_ERROR} fallbackScreenType = FST_NONE;  
 
 int dmaChannel;
@@ -41,6 +44,7 @@ bool includeChroma = true;
 bool is30fpsFrame = true;
 
 bool showFps = false;
+bool animateLogo = false;
 
 void setupGPIO() {
     gpio_init(GBSENSE_PIN);
@@ -120,17 +124,39 @@ bool usbSendFrame() {
     return false;
 }
 
+void updateLogo() {
+    logoFrameIndex++;
+    uint top_start = 36;
+    uint left_start = 24;
+    for (uint h = 0; h < 64; ++h) {
+        for (int w = 0; w < 64; ++w) {
+            backBuffer[(top_start + h) * SCREEN_W + left_start + w] = 0;
+        }
+    }
+    for (uint h = 0; h < 64; ++h) {
+        for (int w = 0; w < 64; ++w) {
+            if ((logoFrameIndex % 24) < 2) {
+                logoFrameIndex += 2;
+            }
+            double newWidthFromCenter = animateLogo
+                ? cos(M_PI * ((logoFrameIndex % 48) / 24.0)) * (w - 32)
+                : w - 32;
+            backBuffer[(top_start + h) * SCREEN_W + left_start + ((int) newWidthFromCenter + 32)] = ctec_logo_raw[h * 64 + w];
+        }
+    }
+}
+
 void updateFallbackScreen() { 
     fallbackFrameIndex++;
     if (fallbackFrameIndex >= 80)
         fallbackFrameIndex = 0;
     for (int x = 0; x < TETRIS_PLAYFIELD_W/2; x++) {
         if (x < fallbackFrameIndex && x + 40 > fallbackFrameIndex) {
-            backBuffer[29*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X + x] = 0x03;
-            backBuffer[29*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X - 1 - x] = 0x03;
+            backBuffer[31*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X + x] = 0x03;
+            backBuffer[31*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X - 1 - x] = 0x03;
         } else {
-            backBuffer[29*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X + x] = 0x00;
-            backBuffer[29*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X - 1 - x] = 0x00;
+            backBuffer[31*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X + x] = 0x00;
+            backBuffer[31*SCREEN_W + TETRIS_PLAYFIELD_W / 2 + TETRIS_PLAYFIELD_OFFSET_X - 1 - x] = 0x00;
         }
     }
 }
@@ -171,6 +197,7 @@ int main(void) {
         uint lastFrame = timer_hw->timerawl;
         uint8_t xOffsetTetris = TETRIS_PLAYFIELD_OFFSET_X + 4;
         while (!running) {
+            renderText(GBI_NAME, 0x00, 0x03, (uint8_t *)backBuffer, 113, 77);
             if (isGameBoyOn()) {
                 if (fallbackScreenType == FST_NONE || fallbackScreenType == FST_OFF) {
                     loadFallbackScreen(default_raw, FST_DEFAULT);
@@ -202,6 +229,7 @@ int main(void) {
                 if (usbSendFrame()) {
                     lastFrame = timer_hw->timerawl;
                     updateFallbackScreen();
+                    updateLogo();
                     startBackbufferToJPEG(false);
                 }
             } else

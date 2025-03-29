@@ -20,6 +20,8 @@ void setUniqueSerial();
 #define MIN_FRAME_INTERVAL 166666
 #endif
 
+#define GBI_NAME "GBI 1"
+
 #if CFG_TUD_CDC == 1
 enum {
     ITF_NUM_VIDEO_CONTROL,
