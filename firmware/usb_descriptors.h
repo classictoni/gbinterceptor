@@ -20,7 +20,7 @@ void setUniqueSerial();
 #define MIN_FRAME_INTERVAL 166666
 #endif
 
-#define GBI_NAME "GBI 1"
+#define GBI_NAME "GBI 4"
 
 #if CFG_TUD_CDC == 1
 enum {
