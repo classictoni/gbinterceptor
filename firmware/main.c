@@ -43,8 +43,10 @@ bool dmgColorMode = false;
 bool includeChroma = true;
 bool is30fpsFrame = true;
 
-bool showFps = false;
-bool animateLogo = false;
+bool hideLogo = false;
+bool animateLogo = true;
+bool logoAnimationMirror = false;
+uint animationQuarterLength = 32;
 
 void setupGPIO() {
     gpio_init(GBSENSE_PIN);
@@ -126,27 +128,36 @@ bool usbSendFrame() {
 
 void updateLogo() {
     logoFrameIndex++;
-    uint top_start = 36;
-    uint left_start = 24;
+    uint topStart = 36;
+    uint leftStart = 24;
+    uint animationHalfLength = animationQuarterLength << 1;
+    uint animationFullLength = animationQuarterLength << 2;
     for (uint h = 0; h < 64; ++h) {
         for (int w = 0; w < 64; ++w) {
-            backBuffer[(top_start + h) * SCREEN_W + left_start + w] = 0;
+            backBuffer[(topStart + h) * SCREEN_W + leftStart + w] = 0;
         }
     }
     for (uint h = 0; h < 64; ++h) {
         for (int w = 0; w < 64; ++w) {
-            if ((logoFrameIndex % 24) < 2) {
+            // skip angle 0 because it looks stupid
+            if ((logoFrameIndex % animationHalfLength) < 2) {
                 logoFrameIndex += 2;
             }
+            uint angle;
+            if (logoAnimationMirror) {
+                angle = logoFrameIndex % animationFullLength;
+            } else {
+                angle = (logoFrameIndex % animationHalfLength) < animationQuarterLength ? (logoFrameIndex % animationHalfLength) : animationHalfLength - (logoFrameIndex % animationHalfLength);
+            }
             double newWidthFromCenter = animateLogo
-                ? cos(M_PI * ((logoFrameIndex % 48) / 24.0)) * (w - 32)
+                ? cos(M_PI * ((angle) / (1.0 * animationHalfLength))) * (w - 32)
                 : w - 32;
-            backBuffer[(top_start + h) * SCREEN_W + left_start + ((int) newWidthFromCenter + 32)] = ctec_logo_raw[h * 64 + w];
+            backBuffer[(topStart + h) * SCREEN_W + leftStart + ((int) newWidthFromCenter + 32)] = ctec_logo_raw[h * 64 + w];
         }
     }
 }
 
-void updateFallbackScreen() { 
+void updateFallbackAnimation() { 
     fallbackFrameIndex++;
     if (fallbackFrameIndex >= 80)
         fallbackFrameIndex = 0;
@@ -201,8 +212,8 @@ int main(void) {
             if (isGameBoyOn()) {
                 if (fallbackScreenType == FST_NONE || fallbackScreenType == FST_OFF) {
                     loadFallbackScreen(default_raw, FST_DEFAULT);
-                    renderText("Waiting\nfor game", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, showFps ? 79 : 106);
-                    if (showFps) {
+                    renderText("Waiting\nfor game", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, hideLogo ? 79 : 106);
+                    if (hideLogo) {
                         if (!includeChroma)
                             renderText("60 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
                         else
@@ -214,8 +225,8 @@ int main(void) {
             } else {
                 if (fallbackScreenType == FST_NONE || fallbackScreenType == FST_DEFAULT || fallbackScreenType == FST_ERROR) {
                     loadFallbackScreen(off_raw, FST_OFF);
-                    renderText("Turn on\nGame Boy", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, showFps ? 79 : 106);
-                    if (showFps) {
+                    renderText("Turn on\nGame Boy", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, hideLogo ? 79 : 106);
+                    if (hideLogo) {
                         if (!includeChroma)
                             renderText("60 fps\nmode", 0x03, 0x00, (uint8_t *)backBuffer, xOffsetTetris, 106);
                         else
@@ -228,8 +239,12 @@ int main(void) {
             if (readyBufferIsNew && (!includeChroma || ((uint)(timer_hw->timerawl - lastFrame) > 33333))) {
                 if (usbSendFrame()) {
                     lastFrame = timer_hw->timerawl;
-                    updateFallbackScreen();
-                    updateLogo();
+                    if (!animateLogo || hideLogo) {
+                        updateFallbackAnimation();
+                    }
+                    if (!hideLogo) {
+                        updateLogo();
+                    }
                     startBackbufferToJPEG(false);
                 }
             } else
