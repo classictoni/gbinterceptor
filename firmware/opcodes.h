@@ -6,4 +6,6 @@
 extern void (*opcodes[])();
 void toMemory(uint16_t address, uint8_t data);
 
+extern bool blockVRAMWrites;
+
 #endif
