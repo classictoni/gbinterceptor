@@ -6,6 +6,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake
       - name: Checkout
         uses: actions/checkout@main
       - name: Setup arm-none-eabi-gcc
@@ -15,8 +20,8 @@ jobs:
       - name: Clone pico-sdk dependency (pinned versions of pico-sdk and tinyusb)
         run: |
           git clone https://github.com/raspberrypi/pico-sdk --recurse-submodules
-          cd pico-sdk && sudo git checkout tags/2.0.0 && cd ..
-          cd pico-sdk/lib/tinyusb && sudo git checkout 0.16.0 && cd ../../..
+          cd pico-sdk && sudo git checkout tags/2.2.0 && cd ..
+          cd pico-sdk/lib/tinyusb && sudo git checkout 0.20.0 && cd ../../..
       - name: Build firmware
         run: |
           arm-none-eabi-gcc --version
