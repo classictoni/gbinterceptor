@@ -9,6 +9,7 @@ bool syncArmed = false;
 uint statSyncStage = 0; //0 = false, 1 = register read to A, 2 = masked to 0x03, 3 = cp to 0x01
 uint lySyncStage = 0; //0 = false, 1 = register read, 2 = cp
 uint syncReferenceCycle;
+bool blockVRAMWrites; //0 = allow writes, 1 = block writes
 int syncOffset; //Helper to calculate offset to scanline for synching
 
 void setOffsetToLine(uint8_t line) {
@@ -63,6 +64,9 @@ void toMemory(uint16_t address, uint8_t data) {
 
     if ((address & 0xe000) == 0x8000) { //Writing to VRAM
         VRAM_HASH(address, data); //Calculate hash for game detection if we are writing to VRAM
+        // Block writes to GBC VRAM attribute map.
+        if (blockVRAMWrites)
+            return;
     } else if (address >= 0xff00) { //Handle some IO registers
         switch (address) {
             case 0xff04: //Reset DIV register
@@ -111,6 +115,11 @@ void toMemory(uint16_t address, uint8_t data) {
                 paletteOBP1[1] = ((~data >> 2) & 0x03);
                 paletteOBP1[2] = ((~data >> 4) & 0x03);
                 paletteOBP1[3] = ((~data >> 6) & 0x03);
+                break;
+            case 0xff4f: //VBK, GBC VRAM bank
+                // If VRAM bank 1 is selected, temporarily block all writes to VRAM to avoid glitches.
+                // We only care about bit 0.
+                blockVRAMWrites = data & 1;
                 break;
             case 0xff4d: //KEY1, GBC double speed mode switch
                 if (data & 0x01)
