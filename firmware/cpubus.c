@@ -179,7 +179,7 @@ void reset() {
     resetHashes();
 }
 
-void inline substitudeBusdataFromMemory() {
+void static inline substitudeBusdataFromMemory() {
     if ((*address & 0x8000) != 0 && ((*address & 0xe000) != 0xa000)) { //Neither ROM 0x0000-0x7fff nor external RAM 0xa000-0xbfff
         //This is from RAM, load our version as we cannot see the data on the bus
         *opcode = memory[*address];

@@ -218,7 +218,7 @@ void renderStep() { //Renders eight pixels at once
     x += 8;
 }
 
-void inline insertSpriteOnLine(struct SpriteAttribute * sprite) {
+void static inline insertSpriteOnLine(struct SpriteAttribute * sprite) {
     int i;
     for (i = nSpritesOnLine; i > 0 && spritesOnLine[i-1]->x > sprite->x; i--)
         spritesOnLine[i] = spritesOnLine[i-1];
