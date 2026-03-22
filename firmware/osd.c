@@ -9,7 +9,7 @@ uint8_t osdBuffer[OSD_HEIGHT * SCREEN_W];
 uint osdPosition = SCREEN_H;
 uint timeRemaining = 0;
 
-void inline renderOSDCharacter(char i, uint x, uint y, volatile uint8_t * targetBuffer, uint8_t fgColor, uint8_t bgColor) {
+void static inline renderOSDCharacter(char i, uint x, uint y, volatile uint8_t * targetBuffer, uint8_t fgColor, uint8_t bgColor) {
     for (uint yi = 0; yi < 8; yi++) {
         char line = font8x8_basic[i][yi];
         uint8_t volatile * bufferindex = targetBuffer + (y + yi) * SCREEN_W + x;
