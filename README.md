@@ -59,5 +59,28 @@ Most users should just install the latest release uf2 as described in the [Build
 
 Make sure to check out the submodules too and specifically make sure that the [TinyUSB](https://github.com/hathach/tinyusb) submodule is at least on version 0.14.0 as the Pico SDK currently references an older version. (Also see [#3](https://github.com/Staacks/gbinterceptor/issues/3))
 
+# How To Build The Firmware With Docker
+This fork allows for building the firmware inside a docker container.
+
+Make sure you are in the repository root (`cd gbinterceptor`) when executing these commands.
+* create the image
+```bash
+docker build -t gbinterceptor .
+```
+* start a shell inside the container
+```bash
+docker run --rm -it --name gbinterceptor -v $(pwd)/firmware:/root/firmware gbinterceptor
+```
+* if you run it for the first time, create the build files
+```bash
+# this will run cmake
+create-build
+```
+* build the `.uf2` file
+```bash
+make
+# now you should have the built firmware also outside of the docker container in firmware/build/gb_interceptor.uf2
+```
+
 # License
 The code is released under the GNU General Public Licence 3 and the design files (PCB layout and 3d printed case) are released under the Creative Commons licence CC-BY 4.0.
