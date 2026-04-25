@@ -5,10 +5,16 @@ fail() {
 }
 
 names=(
+    "GBI 0"
     "GBI 1"
     "GBI 2"
     "GBI 3"
     "GBI 4"
+    "GBI 5"
+    "GBI 6"
+    "GBI 7"
+    "GBI 8"
+    "GBI 9"
 )
 for name in "${names[@]}"; do
     sed -i "s/^#define GBI_NAME.*$/#define GBI_NAME \"$name\"/" ../usb_descriptors.h || fail
