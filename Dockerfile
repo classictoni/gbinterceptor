@@ -7,6 +7,6 @@ RUN git clone https://github.com/raspberrypi/pico-sdk.git --recurse-submodules=l
 
 RUN echo 'mkdir -p firmware/build' >> .bashrc
 RUN echo 'cd firmware/build' >> .bashrc
-RUN echo 'alias create-build="PICO_SDK_PATH=~/pico-sdk/ cmake .."' >> .bashrc
+RUN echo 'alias create-build="PICO_SDK_PATH=~/pico-sdk/ cmake .. -DBASE_VIDEO_MODE=1"' >> .bashrc
 
 CMD ["bash"]
