@@ -1,6 +1,7 @@
 #include "ppu.h"
 
 #include "cpubus.h"
+#include "opcodes.h"
 #include "jpeg/jpeg.h"
 #include "debug.h"
 
@@ -92,6 +93,8 @@ void ppuInit() {
     interp_set_config(interp0, 1, &cfgUnmasked0);
     interp_set_config(interp1, 0, &cfgMasked1);
     interp_set_config(interp1, 1, &cfgUnmasked1);
+
+    blockVRAMWrites = 0;
 
     readyBufferIsNew = false;
     renderState = start;
@@ -215,7 +218,7 @@ void renderStep() { //Renders eight pixels at once
     x += 8;
 }
 
-void inline insertSpriteOnLine(struct SpriteAttribute * sprite) {
+void static inline insertSpriteOnLine(struct SpriteAttribute * sprite) {
     int i;
     for (i = nSpritesOnLine; i > 0 && spritesOnLine[i-1]->x > sprite->x; i--)
         spritesOnLine[i] = spritesOnLine[i-1];

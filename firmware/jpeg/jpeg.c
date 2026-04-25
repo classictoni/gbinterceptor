@@ -212,7 +212,7 @@ void inline startBackbufferToJPEG(bool allowFrameBlend) {
 
 }
 
-void inline pushPixelsToJpegPIO(int sm) {
+void static inline pushPixelsToJpegPIO(int sm) {
     //Take care when looking at the following calculations: We read the sequential data as 32bit integer for performance reasons. But since the rp2040 is little-endian, they are represented in reverse byte order here.
 
     uint32_t v = *backIterator + *lastIterator; //Map colors indices of -3, -1, +1, +3 and blends can reach -3, -2, -1, 0, +1, +2, +3

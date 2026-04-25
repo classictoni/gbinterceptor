@@ -13,7 +13,7 @@ If you have pull-requests, bug reports or want to contribute new case designs, p
 
 # Warnings
 
-Please make sure to understand what this device does and what its limitations are. Most importantly, there is a little lag which will make it unsuitable for playing on a bis screen. It might be ok for slow games, but its focus is on recording and streaming.
+Please make sure to understand what this device does and what its limitations are. Most importantly, there is a little lag which will make it unsuitable for playing on a big screen. It might be ok for slow games, but its focus is on recording and streaming.
 
 Also check out the compatibility tables for host software (for example OBS) and particular games. In principle this is a USB video class device and does not require drivers, but not all software supports the unsusual video format of the Interceptor. Similarly, games should usually work, but sometimes there are some details that the Interceptor does not yet support properly and some rare things that cannot work based on the principle of this device.
 
