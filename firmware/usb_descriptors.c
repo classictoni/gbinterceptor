@@ -95,11 +95,11 @@ uint8_t const * tud_descriptor_configuration_cb(uint8_t index) {
 // array of pointer to string descriptors
 char * string_desc_arr [] =
 {
-  (char[]) { 0x09, 0x04 }, // 0: is supported language is English (0x0409)
+  (char[]) { 0x09, 0x04 },       // 0: is supported language is English (0x0409)
   "there.oughta.be",             // 1: Manufacturer
   GBI_NAME,                      // 2: Product
   "1234567890123456",            // 3: Serials, should use chip ID
-  "GB Interceptor Video",        // 4: UVC Interface
+  GBI_NAME,                      // 4: UVC Interface
 };
 
 static uint16_t _desc_str[32];
