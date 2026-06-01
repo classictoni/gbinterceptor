@@ -49,6 +49,7 @@ bool logoAnimationMirror = false;
 uint animationQuarterLength = 32;
 uint angleSkipThreshold = 1;
 char __in_flash("screens")* logo = ctec_logo_raw;
+bool showColorCalibration = false;
 
 void setupGPIO() {
     gpio_init(GBSENSE_PIN);
@@ -159,6 +160,18 @@ void updateLogo() {
     }
 }
 
+void drawColorCalibration() {
+    uint topStart = 18;
+    uint leftStart = 100;
+    for (uint color = 0; color < 4; ++color) {
+        for (uint h = 0; h < 10; ++h) {
+            for (int w = 0; w < 10; ++w) {
+                backBuffer[(topStart + h) * SCREEN_W + leftStart + color * 15 + w] = h % 9 && w % 9 ? color : 0;
+            }
+        }
+    }
+}
+
 void updateFallbackAnimation() { 
     fallbackFrameIndex++;
     if (fallbackFrameIndex >= 80)
@@ -246,6 +259,9 @@ int main(void) {
                     }
                     if (!hideLogo) {
                         updateLogo();
+                    }
+                    if (showColorCalibration) {
+                        drawColorCalibration();
                     }
                     startBackbufferToJPEG(false);
                 }
